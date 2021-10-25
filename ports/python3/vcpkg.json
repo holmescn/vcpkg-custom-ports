@@ -42,6 +42,7 @@
       "name": "vcpkg-cmake-config",
       "host": true
     },
+    "libuuid",
     "zlib"
   ],
   "features": {
