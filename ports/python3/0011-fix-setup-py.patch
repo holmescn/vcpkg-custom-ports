@@ -1,0 +1,22 @@
+diff --git a/setup.py b/setup.py
+index e74a275..21ca234 100644
+--- a/setup.py
++++ b/setup.py
+@@ -769,7 +769,7 @@ def add_cross_compiling_paths(self):
+                     for line in fp.readlines():
+                         if line.startswith("gcc version"):
+                             is_gcc = True
+-                        elif line.startswith("clang version"):
++                        elif "clang version" in line:
+                             is_clang = True
+                         elif line.startswith("#include <...>"):
+                             in_incdirs = True
+@@ -1551,7 +1551,7 @@ def detect_sqlite(self):
+                              '/usr/local/include/sqlite3',
+                              ]
+         if CROSS_COMPILING:
+-            sqlite_inc_paths = []
++            sqlite_inc_paths = self.compiler.include_dirs
+         MIN_SQLITE_VERSION_NUMBER = (3, 7, 15)  # Issue 40810
+         MIN_SQLITE_VERSION = ".".join([str(x)
+                                     for x in MIN_SQLITE_VERSION_NUMBER])

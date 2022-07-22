@@ -1,7 +1,20 @@
 set(VCPKG_TARGET_ARCHITECTURE arm64)
-set(VCPKG_CRT_LINKAGE dynamic)
-set(VCPKG_LIBRARY_LINKAGE dynamic)
+set(VCPKG_CRT_LINKAGE static)
+set(VCPKG_LIBRARY_LINKAGE static)
 set(VCPKG_CMAKE_SYSTEM_NAME Android)
-# If you need to specify the ANDROID_NATIVE_API_LEVEL,
-# please use the overlay triplet and set the value below
-set(ENV{VCPKG_ANDROID_NATIVE_API_LEVEL} "23")
+
+set(ANDROID_API_LEVEL 23)
+set(ANDROID_SDK_ROOT "$ENV{ANDROID_SDK_ROOT}")
+set(ANDROID_NDK_HOME "$ENV{ANDROID_NDK_HOME}")
+set(toolchain_root "${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin")
+set(ENV{PATH} "${toolchain_root}:/usr/local/bin:/usr/bin:/bin")
+
+set(ENV{CC}      aarch64-linux-android${ANDROID_API_LEVEL}-clang)
+set(ENV{CXX}     aarch64-linux-android${ANDROID_API_LEVEL}-clang++)
+set(ENV{AR}      llvm-ar)
+set(ENV{NM}      llvm-nm)
+set(ENV{RANLIB}  llvm-ranlib)
+set(ENV{READELF} llvm-readelf)
+set(ENV{STRIP}   llvm-strip)
+set(ENV{OBJDUMP} llvm-objdump)
+
