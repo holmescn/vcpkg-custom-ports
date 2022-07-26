@@ -1,0 +1,108 @@
+#!/bin/bash
+
+vcpkg_root=$HOME/vcpkg
+packages_dir=$vcpkg_root/packages
+version=3.0.5
+
+# remove openssl dir
+if [ -e prefab/openssl ]
+then
+	rm -rf prefab/openssl
+fi
+
+# create modules dir
+modules_dir=prefab/openssl/aar/prefab/modules
+mkdir -p $modules_dir
+
+# write prefab.json
+cat <<EOF > $modules_dir/../prefab.json
+{
+	"name": "openssl",
+	"schema_version": 1,
+	"dependencies": [],
+	"version": "$version"
+}
+EOF
+
+# write AndroidManifest.xml
+cat <<EOF > $modules_dir/../../AndroidManifest.xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.vcpkg.ndk.support.openssl"
+		  android:versionCode="1"
+		  android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="25"
+	          android:targetSdkVersion="31" />
+</manifest>
+EOF
+
+write_module_json() {
+cat <<EOF > $1/module.json
+{
+	"export_libraries": [],
+	"library_name": null,
+	"android": {
+		"export_libraries": null,
+		"library_name": null
+    }
+}
+EOF
+}
+
+write_abi_json() {
+cat <<EOF > $1/libs/android.$2/abi.json
+{
+	"abi": "$2",
+	"api": 25,
+	"ndk": 25,
+	"stl": "c++_static"
+}
+EOF
+}
+
+# ssl module
+module_dir=$modules_dir/ssl
+mkdir -p $module_dir/libs/android.armeabi-v7a
+mkdir -p $module_dir/libs/android.arm64-v8a
+mkdir -p $module_dir/libs/android.x86
+mkdir -p $module_dir/libs/android.x86_64
+# copy include files
+cp -r $packages_dir/openssl_arm-android/include   $module_dir/libs/android.armeabi-v7a/
+cp -r $packages_dir/openssl_arm64-android/include $module_dir/libs/android.arm64-v8a/
+cp -r $packages_dir/openssl_x86-android/include   $module_dir/libs/android.x86/
+cp -r $packages_dir/openssl_x64-android/include   $module_dir/libs/android.x86_64/
+# copy library files
+cp -r $packages_dir/openssl_arm-android/lib/libssl.a   $module_dir/libs/android.armeabi-v7a/
+cp -r $packages_dir/openssl_arm64-android/lib/libssl.a $module_dir/libs/android.arm64-v8a/
+cp -r $packages_dir/openssl_x86-android/lib/libssl.a   $module_dir/libs/android.x86/
+cp -r $packages_dir/openssl_x64-android/lib/libssl.a   $module_dir/libs/android.x86_64/
+# write abi.json
+write_abi_json $module_dir armeabi-v7a
+write_abi_json $module_dir arm64-v8a
+write_abi_json $module_dir x86
+write_abi_json $module_dir x86_64
+# write module.json
+write_module_json $module_dir
+
+
+# crypto module
+module_dir=$modules_dir/crypto
+mkdir -p $module_dir/libs/android.armeabi-v7a
+mkdir -p $module_dir/libs/android.arm64-v8a
+mkdir -p $module_dir/libs/android.x86
+mkdir -p $module_dir/libs/android.x86_64
+# copy library files
+cp -r $packages_dir/openssl_arm-android/lib/libcrypto.a   $module_dir/libs/android.armeabi-v7a/
+cp -r $packages_dir/openssl_arm64-android/lib/libcrypto.a $module_dir/libs/android.arm64-v8a/
+cp -r $packages_dir/openssl_x86-android/lib/libcrypto.a   $module_dir/libs/android.x86/
+cp -r $packages_dir/openssl_x64-android/lib/libcrypto.a   $module_dir/libs/android.x86_64/
+# write abi.json
+write_abi_json $module_dir armeabi-v7a
+write_abi_json $module_dir arm64-v8a
+write_abi_json $module_dir x86
+write_abi_json $module_dir x86_64
+# write module.json
+write_module_json $module_dir
+
+# create aar
+cd prefab/openssl/aar
+zip -r ../openssl-$version.aar .
