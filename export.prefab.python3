@@ -1,8 +1,8 @@
 #!/bin/bash
 vcpkg_root=$HOME/vcpkg
 packages_dir=$vcpkg_root/packages
-name=openssl
-version=3.0.5
+name=python3
+version=3.10.5
 minSdkVersion=25
 targetSdkVersion=31
 
@@ -71,26 +71,25 @@ dict[arm64-v8a]=arm64
 dict[x86]=x86
 dict[x86_64]=x64
 
-local module_name=$2
+local package_name=$2
+local module_name=$3
 local module_dir=$1/$module_name
 for x in armeabi-v7a arm64-v8a x86 x86_64
 do
 	local arch=${dict[$x]}
 	mkdir -p $module_dir/libs/android.$x
-	if [ -z "$3" ]
-	then
-		cp -r $packages_dir/${name}_$arch-android/include $module_dir/libs/android.$x/
-	fi
-	cp -r $packages_dir/${name}_$arch-android/lib/lib$module_name.a $module_dir/libs/android.$x/
+	cp -r $packages_dir/${package_name}_$arch-android/include $module_dir/libs/android.$x/
+	cp $packages_dir/${package_name}_$arch-android/lib/lib*.a $module_dir/libs/android.$x/
 	write_abi_json $module_dir $x
 done
 write_module_json $module_dir
 }
 
-# ssl module
-copy_module $modules_dir ssl
-# crypto module
-copy_module $modules_dir crypto "false"
+copy_module $modules_dir bzip2 bz2
+copy_module $modules_dir libffi ffi
+copy_module $modules_dir libuuid uuid
+copy_module $modules_dir sqlite3 sqlite3
+copy_module $modules_dir python3 python3.10
 
 # create aar
 cd prefab/$name
