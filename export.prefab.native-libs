@@ -1,20 +1,23 @@
 #!/bin/bash
 vcpkg_root=$HOME/vcpkg
 packages_dir=$vcpkg_root/packages
-name=openssl
-version=3.0.5
-minSdkVersion=25
+
+name=native-libs
+version=1.0.0
+minSdkVersion=23
 targetSdkVersion=31
 
 # remove openssl dir
 if [ -e prefab/$name ]
 then
+	echo remove prefab/$name
 	rm -rf prefab/$name
 fi
 
 # create modules dir
 modules_dir=prefab/$name/prefab/modules
 mkdir -p $modules_dir
+echo create $modules_dir
 
 # write prefab.json
 cat <<EOF > $modules_dir/../prefab.json
@@ -25,17 +28,19 @@ cat <<EOF > $modules_dir/../prefab.json
 	"version": "$version"
 }
 EOF
+echo write prefab.json
 
 # write AndroidManifest.xml
 cat <<EOF > $modules_dir/../../AndroidManifest.xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.vcpkg.ndk.support.$name"
+          package="com.vcpkg.ndk.support.nativelibs"
 		  android:versionCode="1"
 		  android:versionName="1.0">
     <uses-sdk android:minSdkVersion="$minSdkVersion"
 	          android:targetSdkVersion="$targetSdkVersion" />
 </manifest>
 EOF
+echo write AndroidManifest.xml
 
 write_module_json() {
 local module_dir=$1
@@ -57,8 +62,8 @@ local abi=$2
 cat <<EOF > $module_dir/libs/android.$abi/abi.json
 {
 	"abi": "$abi",
-	"api": 25,
-	"ndk": 25,
+	"api": $minSdkVersion,
+	"ndk": 23,
 	"stl": "c++_static"
 }
 EOF
@@ -71,27 +76,39 @@ dict[arm64-v8a]=arm64
 dict[x86]=x86
 dict[x86_64]=x64
 
-local module_name=$2
+local package_name=$2
+local module_name=$3
 local module_dir=$1/$module_name
 for x in armeabi-v7a arm64-v8a x86 x86_64
 do
 	local arch=${dict[$x]}
 	mkdir -p $module_dir/libs/android.$x
-	if [ -z "$3" ]
-	then
-		cp -r $packages_dir/${name}_$arch-android/include $module_dir/libs/android.$x/
-	fi
-	cp -r $packages_dir/${name}_$arch-android/lib/lib$module_name.a $module_dir/libs/android.$x/
+	cp -r $packages_dir/${package_name}_$arch-android/include $module_dir/libs/android.$x/
+	cp $packages_dir/${package_name}_$arch-android/lib/lib*.a $module_dir/libs/android.$x/
 	write_abi_json $module_dir $x
 done
 write_module_json $module_dir
+echo copy $module_name module from $package_name
 }
 
-# ssl module
-copy_module $modules_dir ssl
-# crypto module
-copy_module $modules_dir crypto "false"
+copy_module $modules_dir bzip2 bz2
+copy_module $modules_dir libffi ffi
+copy_module $modules_dir libuuid uuid
+copy_module $modules_dir sqlite3 sqlite3
+copy_module $modules_dir openssl ssl
+copy_module $modules_dir openssl crypto
+copy_module $modules_dir python3 python3.10
+
+# remove useless files
+for x in armeabi-v7a arm64-v8a x86 x86_64
+do
+	rm -rf $modules_dir/crypto/libs/android.$x/include
+	rm $modules_dir/ssl/libs/android.$x/libcrypto.*
+	rm $modules_dir/crypto/libs/android.$x/libssl.*
+done
+echo remove some files
 
 # create aar
 cd prefab/$name
 zip -rq ../$name-$version.aar .
+echo create aar file
