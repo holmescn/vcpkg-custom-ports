@@ -8,6 +8,7 @@ set(ANDROID_SDK_ROOT "$ENV{ANDROID_SDK_ROOT}")
 set(ANDROID_NDK_HOME "$ENV{ANDROID_NDK_HOME}")
 set(toolchain_root "${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin")
 set(ENV{PATH} "${toolchain_root}:/usr/local/bin:/usr/bin:/bin")
+set(ENV{ANDROID_NATIVE_API_LEVEL} ${ANDROID_API_LEVEL})
 
 set(ENV{CC}      aarch64-linux-android${ANDROID_API_LEVEL}-clang)
 set(ENV{CXX}     aarch64-linux-android${ANDROID_API_LEVEL}-clang++)

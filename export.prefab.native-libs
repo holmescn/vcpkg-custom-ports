@@ -76,9 +76,9 @@ dict[arm64-v8a]=arm64
 dict[x86]=x86
 dict[x86_64]=x64
 
-local package_name=$2
-local module_name=$3
-local module_dir=$1/$module_name
+local package_name=$1
+local module_name=$2
+local module_dir=$modules_dir/$module_name
 for x in armeabi-v7a arm64-v8a x86 x86_64
 do
 	local arch=${dict[$x]}
@@ -91,13 +91,14 @@ write_module_json $module_dir
 echo copy $module_name module from $package_name
 }
 
-copy_module $modules_dir bzip2 bz2
-copy_module $modules_dir libffi ffi
-copy_module $modules_dir libuuid uuid
-copy_module $modules_dir sqlite3 sqlite3
-copy_module $modules_dir openssl ssl
-copy_module $modules_dir openssl crypto
-copy_module $modules_dir python3 python3.10
+copy_module bzip2 bz2
+copy_module libffi ffi
+copy_module libuuid uuid
+copy_module sqlite3 sqlite3
+copy_module openssl ssl
+copy_module openssl crypto
+copy_module python3 python3.10
+copy_module pybind11 pybind11
 
 # remove useless files
 for x in armeabi-v7a arm64-v8a x86 x86_64
