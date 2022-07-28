@@ -29,7 +29,7 @@ def write_prefab_json(modules_dir: Path):
             "version": VERSION
         }, fp, indent=2)
 
-    print(">>> write", os.path.relpath(prefab_json, CWD))
+    print(">>> write prefab.json")
 
 
 def write_androidmanifest_xml(modules_dir: Path):
@@ -45,7 +45,7 @@ def write_androidmanifest_xml(modules_dir: Path):
             '</manifest>'
         ])
 
-    print(">>> write", os.path.relpath(androidmanifest_xml, CWD))
+    print(">>> write AndroidManifest.xml")
 
 
 def write_module_json(module_dir: Path):
@@ -60,7 +60,7 @@ def write_module_json(module_dir: Path):
             }
         }, fp, indent=2)
 
-    print(">>> write", os.path.relpath(module_json, CWD))
+    print(">>> write module.json")
 
 
 def write_abi_json(module_dir: Path, abi: str):
@@ -73,7 +73,7 @@ def write_abi_json(module_dir: Path, abi: str):
 	    "stl": STL
         }, fp, indent=2)
 
-    print(">>> write", os.path.relpath(abi_json, CWD))
+    print(f">>> write abi.json for {abi}")
 
 
 def copy_module_files(modules_dir: Path, package_name: str, module_name: str, copy_include_dir=True):
@@ -87,12 +87,13 @@ def copy_module_files(modules_dir: Path, package_name: str, module_name: str, co
     module_dir = modules_dir / module_name
     packages_dir = Path(VCPKG_ROOT) / 'packages'
 
+    print(f">>> copy module {module_name} files from package {package_name}")
     for arch, abi in arch_to_abi.items():
         os.makedirs(module_dir / 'libs' / f'android.{abi}', exist_ok=True)
         dst_dir = module_dir / 'libs' / f'android.{abi}'
         if copy_include_dir:
             src = packages_dir / f'{package_name}_{arch}-android' / 'include'
-            shutil.copytree(src, dst_dir, dirs_exist_ok=True)
+            shutil.copytree(src, dst_dir / 'include', dirs_exist_ok=True)
 
         lib_dir = packages_dir / f'{package_name}_{arch}-android' / 'lib'
         for lib in os.listdir(lib_dir):
@@ -103,7 +104,6 @@ def copy_module_files(modules_dir: Path, package_name: str, module_name: str, co
 
         write_abi_json(module_dir, abi)
 
-    print(f">>> copy module {module_name} files from package {package_name}")
     write_module_json(module_dir)
 
 
@@ -115,17 +115,22 @@ if prefab_dir.exists():
 modules_dir = prefab_dir / 'prefab' / 'modules'
 os.makedirs(modules_dir)
 
-write_prefab_json(modules_dir)
-write_androidmanifest_xml(modules_dir)
 copy_module_files(modules_dir, 'bzip2', 'bz2')
+copy_module_files(modules_dir, 'zlib', 'z')
 copy_module_files(modules_dir, 'libffi', 'ffi')
 copy_module_files(modules_dir, 'libuuid', 'uuid')
+copy_module_files(modules_dir, 'liblzma', 'lzma')
+copy_module_files(modules_dir, 'expat', 'expat')
 copy_module_files(modules_dir, 'sqlite3', 'sqlite3')
 copy_module_files(modules_dir, 'openssl', 'ssl')
 copy_module_files(modules_dir, 'openssl', 'crypto', copy_include_dir=False)
 copy_module_files(modules_dir, 'python3', 'python3.10')
 
-with os.popen(f"cd {prefab_dir} && zip -r -q ../{NAME}-{VERSION}.aar .") as fp:
+write_prefab_json(modules_dir)
+write_androidmanifest_xml(modules_dir)
+
+cmd = f"cd {prefab_dir} && zip -r -q ../{NAME}-{VERSION}.aar ."
+with os.popen(cmd) as fp:
     pass
 
 print(f">>> aar file {NAME}-{VERSION}.aar created in {os.path.relpath(prefab_dir, CWD)}")
