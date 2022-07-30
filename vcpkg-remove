@@ -1,0 +1,8 @@
+#!/bin/bash
+for p in $*
+do
+	for arch in arm arm64 x86 x64
+	do
+	    vcpkg remove $p:$arch-android
+	done
+done

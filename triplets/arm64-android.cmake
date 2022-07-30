@@ -3,7 +3,7 @@ set(VCPKG_CRT_LINKAGE static)
 set(VCPKG_LIBRARY_LINKAGE static)
 set(VCPKG_CMAKE_SYSTEM_NAME Android)
 
-set(ANDROID_API_LEVEL 23)
+set(ANDROID_API_LEVEL 25)
 set(ANDROID_SDK_ROOT "$ENV{ANDROID_SDK_ROOT}")
 set(ANDROID_NDK_HOME "$ENV{ANDROID_NDK_HOME}")
 set(toolchain_root "${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin")
