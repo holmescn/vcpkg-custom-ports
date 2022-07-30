@@ -10,17 +10,20 @@ do
         ports=$ports:$(realpath $SCRIPTPATH/ports)/$x
     fi
 done
-export VCPKG_OVERLAY_PORTS=$ports
-export VCPKG_OVERLAY_TRIPLETS=$(realpath $SCRIPTPATH/triplets)
 
-if [ -z "$ANDROID_SDK_ROOT" ]; then
+if [ -z "$ANDROID_SDK_ROOT" ]
+then
 	export ANDROID_SDK_ROOT=$HOME/.android/Sdk
 fi
 
+export VCPKG_OVERLAY_PORTS=$ports
+export VCPKG_OVERLAY_TRIPLETS=$(realpath $SCRIPTPATH/triplets)
+export ANDROID_NATIVE_API_LEVEL=28
 #export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/23.2.8568313
 #export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/24.0.8215888
 export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/25.0.8775105
-export PATH=$PATH:$HOME/vcpkg
+export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
+export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH:$HOME/vcpkg
 
-unset SCRIPTPATH
 unset ports
+unset SCRIPTPATH
